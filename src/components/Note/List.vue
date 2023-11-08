@@ -12,8 +12,10 @@
 						<div class="item__top">
 							<div class="item__text">{{ item.title }}</div>
 							<div class="item__done" @click="$emit('doneNote', index)">
-								<span v-if="!item.done">Выполнить</span>
-								<span v-else>Отменить выполнение</span>
+								<Transition name="no-mode-fade" mode="out-in">
+									<span v-if="!item.done">Выполнить</span>
+									<span v-else>Отменить выполнение</span>
+								</Transition>
 							</div>
 							<span class="item__remove" @click="$emit('removeNote', index)"
 								>&#10008;</span
@@ -23,6 +25,7 @@
 							v-if="item.tags && item.tags.length > 0"
 							isNoClickable
 							:items="item.tags"
+							:isDone="item.done"
 						/>
 					</div>
 				</div>
@@ -51,6 +54,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.no-mode-fade-enter-active,
+.no-mode-fade-leave-active {
+	transition: opacity 0.3s;
+}
+
+.no-mode-fade-enter-from,
+.no-mode-fade-leave-to {
+	opacity: 0;
+}
 .notes {
 	margin-top: 10px;
 
@@ -67,6 +79,7 @@ export default {
 	}
 }
 .item {
+	transition: all 0.4s ease 0s;
 	&__top {
 		display: flex;
 		justify-content: space-between;
@@ -85,13 +98,14 @@ export default {
 		font-size: 30px;
 	}
 	&__done {
+		transition: all 0.4s ease 0s;
 		margin-left: auto;
 		margin-right: 40px;
 		cursor: pointer;
 	}
 	&.last {
 		order: 1;
-		background-color: #3cb42a;
+		background-color: #53b744;
 	}
 }
 </style>

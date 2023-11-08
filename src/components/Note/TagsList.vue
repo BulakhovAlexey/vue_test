@@ -5,6 +5,7 @@
 			:class="{
 				isNoClickable: isNoClickable,
 				selected: isSelected(item),
+				last: isDone,
 			}"
 			@click="toggleClass(item)"
 			:key="item"
@@ -29,6 +30,10 @@ export default {
 		selectedTags: {
 			type: Array,
 			default: [],
+		},
+		isDone: {
+			type: Boolean,
+			default: false,
 		},
 	},
 	methods: {
@@ -87,6 +92,10 @@ export default {
 		&.isActive {
 			background-color: #1e481a;
 			color: white;
+		}
+		&.last {
+			transition: all 0.3s ease 0s;
+			background-color: #fff;
 		}
 	}
 }
