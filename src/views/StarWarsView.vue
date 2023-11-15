@@ -1,66 +1,43 @@
 <template>
-	<div>StarWarsView page!</div>
-	<button class="button">GO</button>
-	<div v-if="loading">Loading......</div>
-	<div class="person" v-else v-for="person in persons" :key="person.name">
-		<div class="person__inner">
-			<div class="person__main-info">
-				<div class="person__prop prop">
-					<div class="prop__name">Name</div>
-					<div class="prop__value">{{ person.name }}</div>
-				</div>
-				<div class="person__prop prop">
-					<div class="prop__name">height</div>
-					<div class="prop__value">{{ person.height }}</div>
-				</div>
-				<div class="person__prop prop">
-					<div class="prop__name">skin color</div>
-					<div class="prop__value">{{ person.skin_color }}</div>
-				</div>
-			</div>
-			<div
-				@click="showProp(person.homeworld, person.name, $event)"
-				class="test"
-			>
-				Show Home World
-			</div>
-			<div v-for="home in homeWorldList">
-				<div v-if="home.key == person.name">
-					<div class="person__main-info">
-						<div class="person__prop prop">
-							<div class="prop__name">Planet Name</div>
-							<div class="prop__value">{{ home.name }}</div>
-						</div>
-						<div class="person__prop prop">
-							<div class="prop__name">Planet Population</div>
-							<div class="prop__value">{{ home.population }}</div>
-						</div>
-					</div>
-				</div>
-			</div>
+	<h1 class="star-wars">Star Wars App!</h1>
+	<transition-group name="startView">
+		<Preloader v-if="loading" />
+		<div class="star__inner" v-else>
+			<Persons :items="persons" />
+			<LoadMore
+				v-if="nextPage != null"
+				:url="nextPage"
+				@loadMorePersons="loadMoreItems"
+				@updateNextPage="updateNextPage"
+			/>
 		</div>
-	</div>
+	</transition-group>
 </template>
 
 <script>
 import axios from 'axios'
+import Preloader from '@/components/UI/Preloader'
+import LoadMore from '@/components/UI/LoadMore'
+import Persons from '@/components/StarWars/Persons'
 export default {
+	components: { Preloader, Persons, LoadMore },
 	data() {
 		return {
+			url: 'https://swapi.dev/api/people/?page=1',
 			persons: [],
 			loading: true,
-			homeWorldList: [],
+			nextPage: '',
 		}
 	},
 	mounted() {
-		this.init()
+		this.init(this.url)
 	},
 	methods: {
-		init() {
-			const url = 'https://swapi.dev/api/people/?page=2'
+		init(url) {
 			axios
-				.get(url)
+				.get(this.url)
 				.then(response => {
+					this.nextPage = response.data.next
 					this.persons = response.data.results
 					this.loading = false
 				})
@@ -68,65 +45,33 @@ export default {
 					console.log(error)
 				})
 		},
-		showProp(prop, key, event) {
-			axios
-				.get(prop)
-				.then(response => {
-					const homeDataItem = {
-						key: key,
-						name: response.data.name,
-						population: response.data.population,
-					}
-					this.homeWorldList.push(homeDataItem)
-					event.target.style.display = 'none'
-				})
-				.catch(error => {
-					console.log(error)
-				})
+		loadMoreItems(nextPageArr) {
+			nextPageArr.forEach(element => {
+				this.persons.push(element)
+			})
 		},
-		isEmptyObj(obj) {
-			return Object.keys(obj).length == 0 ? true : false
+		updateNextPage(newPage) {
+			this.nextPage = newPage
 		},
+		// isEmptyObj(obj) {
+		// 	return Object.keys(obj).length == 0 ? true : false
+		// },
 	},
 }
 </script>
 
 <style lang="scss" scoped>
-.person {
-	&:not(:last-child) {
-		margin-bottom: 20px;
-	}
-	&__inner {
-		width: 100%;
-		padding: 10px 30px;
-		border: 1px solid black;
-		border-radius: 15px;
-	}
-	&__main-info {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20px;
-	}
-	&__prop {
-		flex: 0 1 33.33%;
-	}
+.star-wars {
+	font-size: 26px;
+	font-weight: bold;
+	margin-bottom: 30px;
 }
-.prop {
-	display: block;
-	text-align: left;
-	&__name {
-		margin-right: 20px;
-		font-size: 20px;
-		text-transform: uppercase;
-		margin-bottom: 10px;
-	}
-
-	&__value {
-		font-size: 22px;
-		font-weight: bold;
-	}
+.startView-enter-active,
+.startView-leave-active {
+	transition: opacity 1s ease;
 }
-.test {
+.startView-enter-from,
+.startView-leave-to {
+	opacity: 0;
 }
 </style>
